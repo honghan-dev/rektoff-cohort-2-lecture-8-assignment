@@ -2,7 +2,7 @@
 
 **Auditor:** Han (0x4lifemen) (GitHub: [honghan-dev](https://github.com/honghan-dev)) (X: [@4lifemen](https://x.com/4lifemen))
 
-**Scope:** Review of `account_4/programs/account_4/src/lib.rs`
+**Scope:** Review of [`account_4/programs/account_4/src/lib.rs`](https://github.com/mario-eth/rektoff-solana-bootcamp-lectures/blob/main/lecture_2/account_4/programs/account_4/src/lib.rs#L162-L179)
 
 **Platform:** Solana/Anchor
 
