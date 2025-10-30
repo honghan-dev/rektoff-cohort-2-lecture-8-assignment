@@ -1,6 +1,6 @@
 # Rektoff Lecture 8 Assignment
 
-**Auditor:** Han (0x4lifemen) (GitHub: [honghan-dev](https://github.com/honghan-dev)) ([X](https://x.com/4lifemen))
+**Auditor:** Han (0x4lifemen) (GitHub: [honghan-dev](https://github.com/honghan-dev)) (X: [@4lifemen](https://x.com/4lifemen))
 
 **Scope:** Review of `account_4/programs/account_4/src/lib.rs`
 
