@@ -253,7 +253,7 @@ Add a check ensuring the signer matches the vault owner:
 ```rust
 #[account]
 pub struct UserVault {
-+   pub user: Pubkey // <@- add this user
++   pub user: Pubkey, // <@- add this user
     pub user_id: u64,
     pub vault_name: String,
     pub balance: u64,
