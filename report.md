@@ -11,18 +11,21 @@
 2. [Methodology](#methodology)
 3. [Security Review Summary](#summary)
 4. [Findings Details](#findings-details)
-   * [High Severity](#high-severity)
+   * [High Severity](#high)
         * [H-01 - User fund stuck due to DOS caused by PDA collision](#h1)
         * [H-02 – Missing Ownership Validation in `withdraw_from_vault`](#h2)
-   * [Medium Severity](#medium-severity)
-   * [Low Severity](#low-severity)
-   * [Informational / Gas Optimization](#informational--gas-optimization)
-        * [Info-01](#info01)
+   * [Medium Severity](#medium)
+   * [Low Severity](#low)
+        * [Low-01 - Missing Overflow Check in `deposit_to_vault`](#low01)
+   * [Informational / Gas Optimization](#info)
+        * [Info-01 - User can't close their `user_vault` no longer in used](#info01)
+        * [Info-02 - Anyone can mint NFT](#info02)
+
 5. [Recommendations](#recommendations)
 
 ---
 
-## Project Summary
+## <a id="summary">Summary</a>
 
 The `account_4` program implements a simple on-chain vault system on **Solana** using **Anchor framework**. It allows users to create `user_vaults`, deposit funds, and withdraw funds.
 
@@ -34,17 +37,17 @@ The audit reviewed the `initialization`, `deposit`, and `withdrawal` flows — i
 
 | Severity | Count |
 |-----------|-------|
-| 🔴 High   | 2 |
-| 🟠 Medium | 0 |
-| 🟡 Low    | 0 |
-| 🔵 Info   | 1 |
-| **Total** | **3** |
+| High   | 2 |
+| Medium | 0 |
+| Low    | 1 |
+| Info   | 2 |
+| **Total** | **5** |
 
 ---
 
-## 🔎 Findings Details
+## <a id="finding-details">Findings Details
 
-### High Severity
+### <a id="high">High Severity</a>
 
 ### <a id="h1">H-01 - User fund stuck due to DOS caused by PDA collision</a>
 
@@ -296,7 +299,66 @@ pub struct WithdrawFromVault<'info> {
 
 ---
 
-### Informational
+### <a id="low">Low Severity</a>
+
+### <a id="low01">Missing Overflow Check in `deposit_to_vault`</a>
+
+**Severity:** Low
+
+**Description**
+
+The [`account_4::deposit_to_vault`](https://github.com/mario-eth/rektoff-solana-bootcamp-lectures/blob/c51909976951612ed95d429b6083072e396e3c1e/lecture_2/account_4/programs/account_4/src/lib.rs#L162-L179) instruction updates the vault balance using unchecked arithmetic:
+
+While this condition is practically unreachable for `SOL (9 decimals)` or typical tokens, it becomes plausible if the vault is later extended to support high-precision tokens (e.g., 12–18 decimals), as sometimes seen with bridged or synthetic SPL tokens.
+
+```rust
+pub fn deposit_to_vault(
+    ctx: Context<DepositToVault>,
+    user_id: u64,
+    vault_name: String,
+    amount: u64,
+) -> Result<()> {
+    let vault = &mut ctx.accounts.user_vault;
+
+    vault.balance += amount; // <@-- @audit doesn't check for overflow
+
+    msg!(
+        "Deposited {} tokens to vault '{}' for user {}",
+        amount,
+        vault_name,
+        user_id
+    );
+    Ok(())
+}
+```
+
+**Impact:**
+
+1. Vault balances may wrap around to zero or incorrect values.
+
+**Recommendation**
+
+```diff
+pub fn deposit_to_vault(
+    ctx: Context<DepositToVault>,
+    user_id: u64,
+    vault_name: String,
+    amount: u64,
+) -> Result<()> {
+    // CODE OMITTED
+-   vault.balance += amount;
++   vault.balance = vault
++     .balance
++     .checked_add(amount)
++     .ok_or(ErrorCode::Overflow)?;
+
+    // CODE OMITTED
+}
+```
+
+---
+
+### <a id="info">Informational</a>
 
 ### <a id="info01">Info - User can't close `user_vault`</a>
 
@@ -320,9 +382,67 @@ pub user_vault: Account<'info, UserVault>,
 
 **Impact:** Low
 
-* The user permanently loses a small amount of SOL used for rent (typically ~0.002–0.005 SOL).
-* Over time, a large number of empty vaults can increase state bloat and unnecessary ledger footprint.
+1. The user loses a small amount of SOL used for rent (typically ~0.002–0.005 SOL).
+2. Over time, a large number of empty vaults can increase state bloat and unnecessary ledger footprint.
 
 **Recommendation**
 
 Allow user to close their `user_vault`
+
+### <a id="info02">Info - `MintNFT instruction has no access control, anyone can call`</a>
+
+**Severity:** Informational
+
+**Description**
+
+[MintNFT](https://github.com/mario-eth/rektoff-solana-bootcamp-lectures/blob/c51909976951612ed95d429b6083072e396e3c1e/lecture_2/account_4/programs/account_4/src/lib.rs#L67-L79) doesn't have access control, allowing anyone to mint NFT.
+
+However as the function currently doesn't modify any state, hence reporting as informational
+
+```rust
+pub struct MintNft<'info> {
+    #[account(
+        seeds = [
+            b"authority", 
+            collection_id.to_le_bytes().as_ref(),
+            collection_name.as_bytes()
+        ],
+        bump
+    )]
+    pub collection_authority: Account<'info, CollectionAuthority>,
+    #[account(mut)]
+    pub minter: Signer<'info>,
+}
+```
+
+**Impact:** Informational
+
+**Recommendation**
+
+Add authority field in the `CollectionAuthority` struct and use it as such:
+
+```diff
+#[account]
+pub struct CollectionAuthority {
+    pub collection_id: u64,
+    pub collection_name: String,
+    pub can_mint: u64,
++   pub authority: Pubkey, // <@- add this
+}
+
+pub fn mint_nft(
+    ctx: Context<MintNft>,
+    collection_id: u64,
+    collection_name: String,
+) -> Result<()> {
+    // CODE OMITTED
+
++   require_keys_eq!(
++     collection.authority,
++     ctx.accounts.minter.key(),
++     ErrorCode::Unauthorized
++   );
+
+    // CODE OMITTED
+}
+```
