@@ -19,10 +19,10 @@
         * [H-02 – Missing Ownership Validation in `withdraw_from_vault`, anyone can withdraw fund](#h2)
    * [Medium Severity](#medium)
    * [Low Severity](#low)
-        * [Low-01 - Missing Overflow Check in `deposit_to_vault`](#low01)
+        * [L-01 - Missing Overflow Check in `deposit_to_vault`](#low01)
    * [Informational / Gas Optimization](#info)
-        * [Info-01 - User can't close their `user_vault` no longer in used](#info01)
-        * [Info-02 - Anyone can mint NFT](#info02)
+        * [I-01 - User can't close their `user_vault` that is no longer in used](#info01)
+        * [I-02 - Missing access control in `mint_nft` instruction](#info02)
 
 ---
 
@@ -302,7 +302,7 @@ pub struct WithdrawFromVault<'info> {
 
 ### <a id="low">Low Severity</a>
 
-### <a id="low01">Missing Overflow Check in `deposit_to_vault`</a>
+### <a id="low01">L-01 Missing Overflow Check in `deposit_to_vault`</a>
 
 **Severity:** Low
 
@@ -361,7 +361,7 @@ pub fn deposit_to_vault(
 
 ### <a id="info">Informational</a>
 
-### <a id="info01">Info - User can't close `user_vault`</a>
+### <a id="info01">I-01 - User can't close `user_vault` that is no longer used in</a>
 
 **Severity:** Informational
 
@@ -390,7 +390,7 @@ pub user_vault: Account<'info, UserVault>,
 
 Allow user to close their `user_vault`
 
-### <a id="info02">Info - `MintNFT instruction has no access control, anyone can call`</a>
+### <a id="info02">I-02 - Missing access control in `mint_nft` instruction</a>
 
 **Severity:** Informational
 
