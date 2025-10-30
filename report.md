@@ -21,8 +21,6 @@
         * [Info-01 - User can't close their `user_vault` no longer in used](#info01)
         * [Info-02 - Anyone can mint NFT](#info02)
 
-5. [Recommendations](#recommendations)
-
 ---
 
 ## <a id="summary">Summary</a>
