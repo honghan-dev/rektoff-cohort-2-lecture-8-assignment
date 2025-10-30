@@ -1,7 +1,10 @@
 # Rektoff Lecture 8 Assignment
 
 **Auditor:** Han (0x4lifemen) (GitHub: [honghan-dev](https://github.com/honghan-dev)) ([X](https://x.com/4lifemen))
+
 **Scope:** Review of `account_4/programs/account_4/src/lib.rs`
+
+**Platform:** Solana/Anchor
 
 ---
 
@@ -262,7 +265,7 @@ pub struct InitializeUserVault<'info> {
     #[account(
         init,
         payer = payer,
-+        space = 8 + 8 + 4 + vault_name.len() + 8 + 32, // <@- add additional 32 bytes
++       space = 8 + 8 + 4 + vault_name.len() + 8 + 32, // <@- add additional 32 bytes
         seeds = [
             b"user_vault", 
             user_id.to_le_bytes().as_ref(),
