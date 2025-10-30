@@ -16,7 +16,7 @@
 4. [Findings Details](#findings-details)
    * [High Severity](#high)
         * [H-01 - User fund stuck due to DOS caused by PDA collision](#h1)
-        * [H-02 – Missing Ownership Validation in `withdraw_from_vault`](#h2)
+        * [H-02 – Missing Ownership Validation in `withdraw_from_vault`, anyone can withdraw fund](#h2)
    * [Medium Severity](#medium)
    * [Low Severity](#low)
         * [Low-01 - Missing Overflow Check in `deposit_to_vault`](#low01)
@@ -96,7 +96,7 @@ Remove the `vault_authority` account in the `account_4::WithdrawFromVault`.
     }
 ```
 
-### <a id="h2">H-02 – Missing Ownership Validation in `withdraw_from_vault`</a>
+### <a id="h2">H-02 – Missing Ownership Validation in `withdraw_from_vault`, anyone can withdraw fund</a>
 
 **Severity:** HIGH
 
